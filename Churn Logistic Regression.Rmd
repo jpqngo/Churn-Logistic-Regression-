@@ -1,0 +1,266 @@
+---
+title: "Churn Logistic Regression"
+author: "Jeffrey Ngo"
+date: "2/2/2021"
+output: html_document
+---
+
+```{r}
+#Load the data 
+customer <- read.csv("C:/Users/My Gaming PC/Desktop/WGU/D207 Exploratory Data Analysis/churn_clean.csv")
+```
+
+```{r}
+#Load in packages needed for manipulations
+library(dbplyr)
+library(tidyverse)
+
+#Create a reduced data frame 
+
+reduced_customer <- customer %>% select(CaseOrder, Gender, Churn, Techie, Contract, Port_modem, Tablet, InternetService, Phone, Multiple, OnlineSecurity, OnlineBackup, DeviceProtection, TechSupport, StreamingTV, StreamingMovies, PaperlessBilling, PaymentMethod)
+
+#Preview the data
+str(reduced_customer)
+```
+
+```{r}
+
+#Change the data type of the variables into factors in preparation for logistic regression
+
+reduced_customer <- reduced_customer %>% 
+  mutate(Gender = as.factor(Gender),
+         Churn = as.factor(Churn),
+         Techie = as.factor(Techie),
+         Contract = as.factor(Contract),
+         Port_modem = as.factor(Port_modem),
+         Tablet = as.factor(Tablet),
+         InternetService = as.factor(InternetService),
+         Phone = as.factor(Phone),
+         Multiple = as.factor(Multiple),
+         OnlineSecurity = as.factor(OnlineSecurity),
+         OnlineBackup = as.factor(OnlineBackup),
+         DeviceProtection = as.factor(DeviceProtection),
+         TechSupport = as.factor(TechSupport),
+         StreamingTV = as.factor(StreamingTV),
+         StreamingMovies = as.factor(StreamingMovies),
+         PaperlessBilling = as.factor(PaperlessBilling),
+         PaymentMethod = as.factor(PaymentMethod))
+
+#Preview the data, making sure they are factors
+str(reduced_customer)
+```
+
+```{r}
+#Retrieve Summary statistics of the variables
+summary(reduced_customer)
+```
+
+```{r}
+#Load in packages needed for visualization
+library(ggplot2)
+library(gridExtra)
+```
+
+```{r, fig.width = 14}
+
+#Create Univariate distribution visuals
+c1 <- ggplot(reduced_customer, aes(x = Gender)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Gender")
+
+c2 <- ggplot(reduced_customer, aes(x = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Churn")
+
+c3 <- ggplot(reduced_customer, aes(x = Techie)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Techie")
+
+c4 <- ggplot(reduced_customer, aes(x = Contract)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Contract")
+
+c5 <- ggplot(reduced_customer, aes(x = Port_modem)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Port Modem")
+
+c6 <- ggplot(reduced_customer, aes(x = Tablet)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Tablet")
+
+c7 <- ggplot(reduced_customer, aes(x = InternetService)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Internet Service")
+
+c8 <- ggplot(reduced_customer, aes(x = Phone)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Phone")
+
+c9 <- ggplot(reduced_customer, aes(x = Multiple)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Multiple")
+
+c10 <- ggplot(reduced_customer, aes(x = OnlineSecurity)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Online Security")
+
+c11 <- ggplot(reduced_customer, aes(x = OnlineBackup)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Online Backup")
+
+c12 <- ggplot(reduced_customer, aes(x = DeviceProtection)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Device Protection")
+
+c13 <- ggplot(reduced_customer, aes(x = TechSupport)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "TechSupport")
+
+c14 <- ggplot(reduced_customer, aes(x = StreamingTV)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Streaming TV")
+
+c15 <- ggplot(reduced_customer, aes(x = StreamingMovies)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Streaming Movies")
+
+c16 <- ggplot(reduced_customer, aes(x = PaperlessBilling)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "PaperlessBilling")
+
+c17 <- ggplot(reduced_customer, aes(x = PaymentMethod)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "PaymentMethod")
+
+grid.arrange(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, ncol = 6)
+```
+
+
+```{r, fig.height= 10, fig.width = 14}
+
+#Create bivariate distribution visuals
+b1 <- ggplot(reduced_customer, aes(x = Gender, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Gender")
+
+b2 <- ggplot(reduced_customer, aes(x = Techie, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Techie")
+
+b3 <- ggplot(reduced_customer, aes(x = Contract, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Contract")
+
+b4 <- ggplot(reduced_customer, aes(x = Port_modem, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Port Modem")
+
+b5 <- ggplot(reduced_customer, aes(x = Tablet, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Tablet")
+
+b6 <- ggplot(reduced_customer, aes(x = InternetService, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Internet Service")
+
+b7 <- ggplot(reduced_customer, aes(x = Phone, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Phone")
+
+b8 <- ggplot(reduced_customer, aes(x = Multiple, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Multiple")
+
+b9 <- ggplot(reduced_customer, aes(x = OnlineSecurity, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Online Security")
+
+b10 <- ggplot(reduced_customer, aes(x = OnlineBackup, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Online Backup")
+
+b11 <- ggplot(reduced_customer, aes(x = DeviceProtection, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Device Protection")
+
+b12 <- ggplot(reduced_customer, aes(x = TechSupport, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "TechSupport")
+
+b13 <- ggplot(reduced_customer, aes(x = StreamingTV, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Streaming TV")
+
+b14 <- ggplot(reduced_customer, aes(x = StreamingMovies, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "Streaming Movies")
+
+b15 <- ggplot(reduced_customer, aes(x = PaperlessBilling, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "PaperlessBilling")
+
+b16 <- ggplot(reduced_customer, aes(x = PaymentMethod, fill = Churn)) +
+         geom_histogram(stat = 'count') +
+         labs(x = "PaymentMethod")
+
+grid.arrange(b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, ncol = 4)
+
+
+```
+
+```{r}
+#Create Initial Logistic Regression Model
+formula1 <- Churn ~ Gender + Techie + Contract + Port_modem + Tablet + InternetService + Phone + Multiple + OnlineSecurity + OnlineBackup + DeviceProtection + TechSupport + StreamingTV + StreamingMovies + PaperlessBilling + PaymentMethod
+
+LRM <- glm(formula1, data = reduced_customer, family = binomial(logit))
+
+#Review Summary
+summary(LRM)
+```
+
+```{r}
+#Create Reduced Logistic Regression Model
+LRM_Reduced <- glm(Churn ~ Gender + Techie + Contract + InternetService + Multiple + DeviceProtection + TechSupport + StreamingTV + StreamingMovies + PaymentMethod, data = reduced_customer, family = binomial(logit), subset = (Gender != "Nonbinary" & PaymentMethod != "Credit Card (automatic)" & PaymentMethod != "Mailed Check"))
+      
+#Review Summary              
+summary(LRM_Reduced)
+```
+
+```{r}
+#Create another reduced model
+LRM_Reduced_2 <- glm(Churn ~  Techie + Contract + InternetService + Multiple + DeviceProtection + StreamingTV + StreamingMovies + PaymentMethod, data = reduced_customer, family = binomial(logit), subset = (PaymentMethod != "Credit Card (automatic)" & PaymentMethod != "Mailed Check"))
+          
+#Check Summary         
+summary(LRM_Reduced_2)
+```
+
+```{r}
+#Create predictions 
+LRM_Reduced_Pred <- round(predict.glm(LRM_Reduced, data = reduced_customer, type = "response"))
+
+table(LRM_Reduced_Pred)
+
+```
+
+```{r}
+#Load packages needed for the confusion matrix
+library(caret)
+library(e1071)
+
+#Set-up data frame to match the chosen reduced logistic model
+Predicted <- as.factor(ifelse(LRM_Reduced_Pred > 0.5,1,0))
+
+actual_customer_churn <- reduced_customer %>% 
+  mutate(Churn = ifelse(Churn == "No",0,1))
+
+actual_customer_churn$Churn <- as.factor(actual_customer_churn$Churn)
+
+actual_customer_churn <- subset(actual_customer_churn, Gender != "Nonbinary" & PaymentMethod != "Credit Card (automatic)" & PaymentMethod != "Mailed Check")
+
+#Create the confusion matrix
+LRM_Reduced_CM <- confusionMatrix(as.factor(LRM_Reduced_Pred), actual_customer_churn$Churn)
+
+#View
+LRM_Reduced_CM
+```
+
